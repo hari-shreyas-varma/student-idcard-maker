@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID Card Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-section h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .photo-upload {
+            margin-bottom: 15px;
+        }
+
+        .photo-upload input[type="file"] {
+            padding: 10px;
+        }
+
+        .photo-preview {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed #667eea;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-preview.empty {
+            color: #999;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-reset {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-print {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #45a049;
+        }
+
+        .card-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .id-card {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .id-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+
+        .id-card-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .id-card-header {
+            text-align: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .id-card-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .id-card-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .id-card-body {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .photo-section {
+            flex-shrink: 0;
+        }
+
+        .student-photo {
+            width: 120px;
+            height: 140px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .student-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .info-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .info-value {
+            font-weight: 500;
+        }
+
+        .id-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            padding-top: 10px;
+        }
+
+        .student-id {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .validity {
+            text-align: right;
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .validity-text {
+            font-weight: 600;
+        }
+
+        .empty-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            text-align: center;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .form-section {
+                display: none;
+            }
+
+            .card-section {
+                gap: 0;
+            }
+
+            .button-group {
+                display: none;
+            }
+
+            .id-card {
+                box-shadow: none;
+                border-radius: 0;
+                margin-bottom: 50px;
+            }
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-section">
+            <h1>📋 Student ID Card Generator</h1>
+            
+            <div class="success-message" id="successMessage">
+                ✓ ID Card generated successfully!
+            </div>
+
+            <form id="studentForm" onsubmit="handleSubmit(event)">
+                <div class="photo-upload">
+                    <label>Student Photo</label>
+                    <input type="file" id="photoInput" accept="image/*">
+                    <div class="photo-preview empty" id="photoPreview">
+                        <span>No photo selected</span>
+                    </div>
+                </div>
+
+                <div class="form-group full">
+                    <label for="studentName">Full Name *</label>
+                    <input type="text" id="studentName" placeholder="Enter full name" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rollNumber">Roll Number *</label>
+                        <input type="text" id="rollNumber" placeholder="e.g., CS2024001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentId">Student ID *</label>
+                        <input type="text" id="studentId" placeholder="e.g., 12345678" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="department">Department *</label>
+                        <input type="text" id="department" placeholder="e.g., Computer Science" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="semester">Semester *</label>
+                        <select id="semester" required>
+                            <option value="">Select Semester</option>
+                            <option value="1">1st Semester</option>
+                            <option value="2">2nd Semester</option>
+                            <option value="3">3rd Semester</option>
+                            <option value="4">4th Semester</option>
+                            <option value="5">5th Semester</option>
+                            <option value="6">6th Semester</option>
+                            <option value="7">7th Semester</option>
+                            <option value="8">8th Semester</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="student@university.edu">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" placeholder="9876543210">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob">
+                    </div>
+                    <div class="form-group">
+                        <label for="issueDate">Issue Date *</label>
+                        <input type="date" id="issueDate" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expiryDate">Expiry Date *</label>
+                        <input type="date" id="expiryDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bloodGroup">Blood Group</label>
+                        <select id="bloodGroup">
+                            <option value="">Select Blood Group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group full">
+                    <label for="address">Address</label>
+                    <textarea id="address" placeholder="Enter student address"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-generate">Generate ID Card</button>
+                    <button type="reset" class="btn-reset">Clear Form</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-section">
+            <div id="cardContainer">
+                <div class="id-card">
+                    <div class="empty-card">👆 Fill in the form to generate ID card</div>
+                </div>
+            </div>
+            <button class="btn-print" id="printBtn" style="display: none;" onclick="printCard()">🖨️ Print ID Card</button>
+        </div>
+    </div>
+
+    <script>
+        // Photo preview functionality
+        document.getElementById('photoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const photoPreview = document.getElementById('photoPreview');
+                    photoPreview.innerHTML = '<img src="' + event.target.result + '" alt="Student Photo">';
+                    photoPreview.classList.remove('empty');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            console.log("Form submitted");
+
+            // Get all form values
+            const studentName = document.getElementById('studentName').value;
+            const rollNumber = document.getElementById('rollNumber').value;
+            const studentId = document.getElementById('studentId').value;
+            const department = document.getElementById('department').value;
+            const semester = document.getElementById('semester').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const dob = document.getElementById('dob').value;
+            const issueDate = document.getElementById('issueDate').value;
+            const expiryDate = document.getElementById('expiryDate').value;
+            const bloodGroup = document.getElementById('bloodGroup').value;
+            const address = document.getElementById('address').value;
+            
+            const photoImg = document.querySelector('#photoPreview img');
+            const photoSrc = photoImg ? photoImg.src : null;
+
+            console.log("Data collected:", {studentName, rollNumber, studentId, department, semester, phone, bloodGroup});
+
+            // Generate ID card
+            generateIDCard({
+                name: studentName,
+                rollNumber: rollNumber,
+                studentId: studentId,
+                department: department,
+                semester: semester,
+                email: email,
+                phone: phone,
+                dob: dob,
+                issueDate: issueDate,
+                expiryDate: expiryDate,
+                bloodGroup: bloodGroup,
+                address: address,
+                photo: photoSrc
+            });
+
+            // Show success message
+            const successMessage = document.getElementById('successMessage');
+            successMessage.classList.add('show');
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        function generateIDCard(data) {
+            console.log("Generating card with:", data);
+
+            const formattedExpiryDate = formatDate(data.expiryDate);
+
+            const cardHTML = `
+                <div class="id-card">
+                    <div class="id-card-content">
+                        <div class="id-card-header">
+                            <h2>STUDENT ID CARD</h2>
+                            <p>Valid during academic session</p>
+                        </div>
+
+                        <div class="id-card-body">
+                            <div class="photo-section">
+                                <div class="student-photo">
+                                    ${data.photo ? '<img src="' + data.photo + '" alt="Student Photo">' : '<div style="background: #ddd; width: 100%; height: 100%;"></div>'}
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <div class="info-row">
+                                    <span class="info-label">Name:</span>
+                                    <span class="info-value">${data.name}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Roll No:</span>
+                                    <span class="info-value">${data.rollNumber}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Department:</span>
+                                    <span class="info-value">${data.department}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Semester:</span>
+                                    <span class="info-value">${data.semester}</span>
+                                </div>
+                                ${data.phone ? '<div class="info-row"><span class="info-label">Phone:</span><span class="info-value">' + data.phone + '</span></div>' : ''}
+                                ${data.bloodGroup ? '<div class="info-row"><span class="info-label">Blood Group:</span><span class="info-value">' + data.bloodGroup + '</span></div>' : ''}
+                            </div>
+                        </div>
+
+                        <div class="id-card-footer">
+                            <div class="student-id">ID: ${data.studentId}</div>
+                            <div class="validity">
+                                <div class="validity-text">Valid Till: ${formattedExpiryDate}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('cardContainer').innerHTML = cardHTML;
+            document.getElementById('printBtn').style.display = 'block';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        function printCard() {
+            window.print();
+        }
+
+        // Set today's date as default issue date
+        window.addEventListener('load', function() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            document.getElementById('issueDate').value = year + '-' + month + '-' + day;
+        });
+    </script>
+</body>
+</html>
